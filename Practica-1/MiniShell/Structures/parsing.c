@@ -1,13 +1,11 @@
 #include "parsing.h"
-#include "command.h"
-#include "list.h"
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
 
 
-int parsing_input(char** imput_cmd, struct CMD* cmds){
+int parsing_input(char** imput_cmd, struct CMD** cmds){
 	struct List list = list_create();
 	char* token = strtok(*imput_cmd, DELIM);
 	char* redirect_file;
@@ -23,8 +21,6 @@ int parsing_input(char** imput_cmd, struct CMD* cmds){
 	struct CMD* new_cmds = malloc(sizeof(struct CMD) * INIT_CMD);
 	assert(new_cmds);
 
-	
-
 	while (flag){
 		if (!strcmp(token, REDIRECT)){
 			token = strtok(NULL, DELIM);
@@ -38,17 +34,25 @@ int parsing_input(char** imput_cmd, struct CMD* cmds){
 		}	else if (!((flag = strcmp(token, END_LINE)) || strcmp(token, PIPE))) {
 			if (flag)
 				token = strtok(NULL, DELIM);
-			if (!(strcmp(token, END_LINE) || strcmp(token, PIPE))){
+			if (flag && !(strcmp(token, END_LINE) || strcmp(token, PIPE))){
 				fprintf(stderr, "MiniShell: Unexpected token %s after %s.", token, REDIRECT);
 				status = 1;
 				flag = 0;
 			} else {
 				tokens = list_to_cmd(list);
 				new_cmds[counter++] = make_cmd(&tokens, &redirect_file);
+				list_destroy(&list);
 				if ( counter == max_len )
-					new_cmds = realloc(new_cmds, sizeof(struct List) * (max_len *= 2));
+					assert((new_cmds = realloc(new_cmds, sizeof(struct List) * (max_len *= 2))));
 			}
+		} else {
+			list_add(list, &token, TAIL);
+			token = strtok(NULL, DELIM);
 		}
 	}
-
+	if (status)
+		free(new_cmds);
+	else
+		*cmds = new_cmds;
+	return status;
 }
