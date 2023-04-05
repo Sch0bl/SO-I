@@ -25,6 +25,7 @@ struct List list_add(struct List list, char** token, Order pos);
 
 void list_destroy_aux(struct Node* node);
 
+char** list_to_cmd(struct List list);
 
 
 #endif
