@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-struct CMD cmd_make(char*** cmd, char** file){
+struct CMD make_cmd(char*** cmd, char** file){
 	struct CMD new_cmd;
 	new_cmd.cmd = *cmd;
 	new_cmd.output_file = *file;

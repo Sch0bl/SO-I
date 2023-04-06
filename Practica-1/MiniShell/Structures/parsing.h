@@ -5,7 +5,7 @@
 
 #define DELIM " "
 
-#define END_LINE "\n"
+#define END_LINE	"\n" 
 #define PIPE "|"
 #define REDIRECT ">"
 

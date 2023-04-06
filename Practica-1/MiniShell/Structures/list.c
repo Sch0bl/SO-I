@@ -1,5 +1,6 @@
 #include "list.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 struct List list_create(){
@@ -16,9 +17,7 @@ struct List list_add(struct List list, char** token, Order pos){
 	if (list.first == NULL){
 		new_node->next = NULL;
 		list.first = list.last = new_node;
-		return list;
-	}
-	if (pos == HEAD){
+	} else if (pos == HEAD){
 		new_node->next = list.first;
 		list.first = new_node;
 	} else {
@@ -44,6 +43,7 @@ void list_destroy(struct List* list){
 		return;
 	list_destroy_aux(list->first);
 	list->first = list->last = NULL;
+	list->len = 0;
 }
 
 char** list_to_cmd(struct List list){
@@ -56,6 +56,7 @@ char** list_to_cmd(struct List list){
 		cmd[i] = node->token;
 		node = node->next;
 	}
+	cmd[list.len] = NULL;
 	return cmd;
 }
 
