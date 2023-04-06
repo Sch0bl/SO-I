@@ -28,4 +28,9 @@ int cmd_exec(struct CMD cmd, int status){
 }
 
 
+void destroy_cmd(struct CMD* cmd, int len){
+	for(int i = 0; i < len; i++)
+		free(cmd[i].cmd);
+}
+
 

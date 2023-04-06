@@ -5,57 +5,47 @@
 #include <assert.h>
 #include <stdio.h>
 
-void recorrer1(struct List list){
-	printf("Dentro del recorrer\n");
-	for(struct Node* aux = list.first; aux != NULL; aux = aux->next){
-		printf("%s ", aux->token);
-	}
-	puts("");
-}
-
-
 int parsing_input(char** imput_cmd, struct CMD** cmds){
-	struct List list = list_create();
 	char* token = strtok(*imput_cmd, DELIM);
-	char* redirect_file;
-	char** tokens;
 	if (!strcmp(token, END_LINE))
 		return 1;
+
+	struct List list = list_create();
+	char* redirect_file = NULL;
+	char** tokens;
 	int status = 0;
 	int max_len = INIT_CMD;
 	int counter = 0;	
-	int flag = 1;
-	
-
 	struct CMD* new_cmds = malloc(sizeof(struct CMD) * INIT_CMD);
 	assert(new_cmds);
 
-
-	while (flag/* && (token != NULL)*/){
+	while (token){
 		if (!strcmp(token, REDIRECT)){
 			token = strtok(NULL, DELIM);
-			if (!(strcmp(token, END_LINE) || strcmp(token, PIPE) || strcmp(token, REDIRECT))){
-				fprintf(stderr, "MiniShell: Unexpected token %s after %s.", token, REDIRECT);
+			if ((token == NULL) || strcmp(token, PIPE) || strcmp(token, REDIRECT)){
+				if (!token)
+					token = END_LINE;
+				fprintf(stderr, "MiniShell: Unexpected token \"%s\" after \"%s\".\n", token, REDIRECT);
 				status = 1;
-				flag = 0;
+				token = NULL;
 			} else {
 				redirect_file = token;
-			}
-		}	else if (!((flag = strcmp(token, END_LINE)) && strcmp(token, PIPE))) {
-			printf("%d\n",flag);
-			if (flag){
 				token = strtok(NULL, DELIM);
-				printf("%s\n", token);
-				puts("Holamundo");
 			}
-			if (flag && !(strcmp(token, END_LINE) || strcmp(token, PIPE))){
-				fprintf(stderr, "MiniShell: Unexpected token %s after %s.", token, REDIRECT);
+		}	else if (!(token && strcmp(token, PIPE))) {
+			if (token){
+				token = strtok(NULL, DELIM);
+			}
+			if (token && !(strcmp(token, PIPE))){
+				if (!token)
+					token = END_LINE;
+				fprintf(stderr, "MiniShell: Unexpected token \"%s\" after \"%s\".\n", token, PIPE);
 				status = 1;
-				flag = 0;
+				token = NULL;
 			} else {
-				recorrer1(list);
 				tokens = list_to_cmd(list);
 				new_cmds[counter++] = make_cmd(&tokens, &redirect_file);
+				redirect_file = NULL;
 				list_destroy(&list);
 				if ( counter == max_len )
 					assert((new_cmds = realloc(new_cmds, sizeof(struct List) * (max_len *= 2))));
@@ -65,9 +55,16 @@ int parsing_input(char** imput_cmd, struct CMD** cmds){
 			token = strtok(NULL, DELIM);
 		}
 	}
-	if (status)
+	if (status){
+		list_destroy(&list);
+		destroy_cmd(new_cmds, counter);
 		free(new_cmds);
-	else
+	}
+	else{
+		tokens = list_to_cmd(list);
+		new_cmds[counter++] = make_cmd(&tokens, &redirect_file);
+		list_destroy(&list);
 		*cmds = new_cmds;
-	return status;
+	}
+	return status ? -1 : counter;
 }
