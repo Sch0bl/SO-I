@@ -1,18 +1,18 @@
 #ifndef _COMMAND_
 #define _COMMAND_
 
-struct CMD{
+struct Cmd{
 	char** cmd;
 	char* output_file;
 	int len;
 };
 
 
-struct CMD make_cmd(char*** cmd, char** file);
+struct Cmd cmd_make(char*** cmd, char** file);
 
-int cmd_exec(struct CMD cmd, int status);
+int cmd_exec(struct Cmd cmd);
 
-void destroy_cmd(struct CMD* cmd, int len);
+void cmd_destroy(struct Cmd* cmd, int len);
 
 
 #endif

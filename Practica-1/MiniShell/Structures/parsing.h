@@ -13,7 +13,7 @@
 #include "list.h"
 
 
-int parsing_input(char** imput_cmd, struct CMD** cmds);
+int parsing_input(char** imput_cmd, struct Cmd** cmds);
 
 
 #endif

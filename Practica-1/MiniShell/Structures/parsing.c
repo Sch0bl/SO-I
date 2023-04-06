@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-int parsing_input(char** imput_cmd, struct CMD** cmds){
+int parsing_input(char** imput_cmd, struct Cmd** cmds){
 	char* token = strtok(*imput_cmd, DELIM);
 	if (!strcmp(token, END_LINE))
 		return 1;
@@ -16,7 +16,7 @@ int parsing_input(char** imput_cmd, struct CMD** cmds){
 	int status = 0;
 	int max_len = INIT_CMD;
 	int counter = 0;	
-	struct CMD* new_cmds = malloc(sizeof(struct CMD) * INIT_CMD);
+	struct Cmd* new_cmds = malloc(sizeof(struct Cmd) * INIT_CMD);
 	assert(new_cmds);
 
 	while (token){
@@ -44,7 +44,7 @@ int parsing_input(char** imput_cmd, struct CMD** cmds){
 				token = NULL;
 			} else {
 				tokens = list_to_cmd(list);
-				new_cmds[counter++] = make_cmd(&tokens, &redirect_file);
+				new_cmds[counter++] = cmd_make(&tokens, &redirect_file);
 				redirect_file = NULL;
 				list_destroy(&list);
 				if ( counter == max_len )
@@ -57,12 +57,12 @@ int parsing_input(char** imput_cmd, struct CMD** cmds){
 	}
 	if (status){
 		list_destroy(&list);
-		destroy_cmd(new_cmds, counter);
+		cmd_destroy(new_cmds, counter);
 		free(new_cmds);
 	}
 	else{
 		tokens = list_to_cmd(list);
-		new_cmds[counter++] = make_cmd(&tokens, &redirect_file);
+		new_cmds[counter++] = cmd_make(&tokens, &redirect_file);
 		list_destroy(&list);
 		*cmds = new_cmds;
 	}
