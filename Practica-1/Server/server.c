@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 #include <signal.h>
 #include <sys/epoll.h>
@@ -9,6 +10,7 @@
 #include <netinet/in.h>
 #include <netinet/ip.h>
 
+#define FILE_DATA "server.data"
 
 /*
  * Para probar, usar netcat. Ej:
@@ -87,18 +89,14 @@ void wait_for_clients(int lsock)
 	csock = accept(lsock, NULL, NULL);
 	if (csock < 0)
 		quit("accept");
-        
-    
-    pid_t proc = fork();
-	if (proc == 0){
+	pid_t pid = fork();
+
+	if (pid == 0){
         /* Atendemos al cliente */
 	    handle_conn(csock);
-        exit(EXIT_SUCCESS);
-    }
-    else{
-	    /* Volvemos a esperar conexiones */
-	    wait_for_clients(lsock);
-    }
+      exit(EXIT_SUCCESS);
+  }
+	wait_for_clients(lsock);
 }
 
 /* Crea un socket de escucha en puerto 4040 TCP */
@@ -138,9 +136,11 @@ int mk_lsock()
 
 int main()
 {
+	struct flock lock;
+	
 	int lsock;
 
 	lsock = mk_lsock();
 	
-    wait_for_clients(lsock);
+  wait_for_clients(lsock);
 }
