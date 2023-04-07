@@ -1,7 +1,10 @@
 #ifndef __PARSING__
+
 #define __PARSING__
 
 #define INIT_CMD 2
+
+#define NO_FD -1
 
 #define DELIM " "
 

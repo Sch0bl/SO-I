@@ -3,16 +3,17 @@
 
 struct Cmd{
 	char** cmd;
-	char* output_file;
-	int len;
+	int output_fd;
 };
 
 
-struct Cmd cmd_make(char*** cmd, char** file);
+struct Cmd cmd_make(char*** cmd, int fd);
 
 int cmd_exec(struct Cmd cmd);
 
-void cmd_destroy(struct Cmd* cmd, int len);
+void cmds_destroy(struct Cmd* cmd, int len);
 
+void cmd_destroy(struct Cmd cmd);
 
+void cmd_pipe_exec(struct Cmd* cmds, int **fd, int cmd_len);
 #endif
