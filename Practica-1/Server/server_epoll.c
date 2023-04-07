@@ -58,7 +58,6 @@ void handle_conn(int csock, int epoll_fd, struct epoll_event *ev)
 	char buf[200];
 	int rc;
 
-	//while (1) {
 		/* Atendemos pedidos, uno por linea */
 		rc = fd_readline(csock, buf);
 		if (rc < 0)
@@ -66,6 +65,7 @@ void handle_conn(int csock, int epoll_fd, struct epoll_event *ev)
 
 		if (rc == 0) {
 			/* linea vacia, se cerró la conexión */
+			epoll_ctl(epoll_fd, EPOLL_CTL_DEL, csock, ev);
 			close(csock);
 			return;
 		}
@@ -79,30 +79,7 @@ void handle_conn(int csock, int epoll_fd, struct epoll_event *ev)
 			epoll_ctl(epoll_fd, EPOLL_CTL_DEL, csock, ev);
 			close(csock);
 			return;
-		//}
 	}
-}
-
-void wait_for_clients(int lsock)
-{
-	int csock;
-	/* Esperamos una conexión, no nos interesa de donde viene */
-	csock = accept(lsock, NULL, NULL);
-
-	if (csock < 0)
-		quit("accept");
-        
-    
-    pid_t proc = fork();
-	if (proc == 0){
-        /* Atendemos al cliente */
-	    //handle_conn(csock);
-        exit(EXIT_SUCCESS);
-    }
-    else{
-	    /* Volvemos a esperar conexiones */
-	    wait_for_clients(lsock);
-    }
 }
 
 /* Crea un socket de escucha en puerto 4040 TCP */
@@ -165,6 +142,5 @@ int main()
 				handle_conn(events[i].data.fd,epoll_fd, &ev);
 			}
 		}
-    //wait_for_clients(lsock);
 	}
 }

@@ -29,6 +29,65 @@ void quit(char *s)
 	abort();
 }
 
+int read_data(char* file){ //función para registro de pedidos
+	struct flock lock;
+	lock.l_type = F_WRLCK;
+	lock.l_whence = SEEK_SET;
+	lock.l_start = 0;
+	lock.l_len = 0;
+	lock.l_pid = getpid();
+
+	int request_n;
+
+	int fd;
+	if ((fd = open(file, O_RDONLY)) < 0)
+		quit("fd read_lock");
+
+
+	fcntl(fd, F_GETLK, &lock);	
+	while (lock.l_type != F_UNLCK) {
+		sleep(1);
+		fcntl(fd, F_GETLK, &lock);	
+	}
+
+	read(fd, &request_n, sizeof(request_n));
+
+	lock.l_type = F_UNLCK;
+
+	if (fcntl(fd, F_SETLK, &lock) < 0)
+		quit("Failed to unlock");
+
+	close(fd);
+
+	return request_n;
+}
+
+void write_data(char* file, int* request_n){  //función para registro de pedidos
+	struct flock lock;
+	lock.l_type = F_WRLCK;
+	lock.l_whence = SEEK_SET;
+	lock.l_start = 0;
+	lock.l_len = 4;
+	lock.l_pid = getpid();
+
+	int fd;
+
+	if ((fd = open(file, O_RDWR | O_CREAT, 0666)) < 0)
+		quit("fd write_lock");
+
+	if (fcntl(fd, F_SETLK, &lock) < 0)
+		quit("Failed to lock");
+
+	write(fd, request_n, sizeof(*request_n));
+
+	lock.l_type = F_UNLCK;
+
+	if (fcntl(fd, F_SETLK, &lock) < 0)
+		quit("Failed to unlock");
+
+	close(fd);
+}
+
 int U = 0;
 
 int fd_readline(int fd, char *buf)
@@ -57,7 +116,7 @@ void handle_conn(int csock)
 {
 	char buf[200];
 	int rc;
-
+	int request_n = read_data(FILE_DATA);
 	while (1) {
 		/* Atendemos pedidos, uno por linea */
 		rc = fd_readline(csock, buf);
@@ -66,16 +125,18 @@ void handle_conn(int csock)
 
 		if (rc == 0) {
 			/* linea vacia, se cerró la conexión */
+			write_data(FILE_DATA, &request_n);
 			close(csock);
 			return;
 		}
 
 		if (!strcmp(buf, "NUEVO")) {
 			char reply[20];
-			sprintf(reply, "%d\n", U);
-			U++;
+			sprintf(reply, "%d\n", request_n);
+			request_n++;
 			write(csock, reply, strlen(reply));
 		} else if (!strcmp(buf, "CHAU")) {
+			write_data(FILE_DATA, &request_n);
 			close(csock);
 			return;
 		}
@@ -136,9 +197,9 @@ int mk_lsock()
 
 int main()
 {
-	struct flock lock;
-	
 	int lsock;
+	int init_req = 0;
+	write_data(FILE_DATA, &init_req);
 
 	lsock = mk_lsock();
 	
