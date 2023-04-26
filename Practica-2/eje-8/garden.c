@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define N_VISITANTES 1000000
+#define N_VISITANTES 10000000
 
 int visitantes = 0;
 
