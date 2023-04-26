@@ -1,0 +1,23 @@
+-- Considere el problema del jardín ornamental en un sistema con un único procesador --
+-- a -- ¿Sigue habiendo un problema?
+Si. Los threads no tienen exclusión mutua, por lo cual el race condition permite al los
+threads acceder a la región crítica al mísmo tiempo, generando errores.
+
+-- b -- Si implementa el algoritmo de Peterson, ¿Son necesarias las barreras de memoria?
+
+No, al haber un único procesador, los threads comparten la misma cache, por lo que las 
+variables siempre están actualizadas en ambos threads.
+
+-- c -- Si el incremento se hace con la instrucción incl de x86, ¿hay problema?
+
+No. La función incl de x86 es propia del procesador, por lo cual, cuando este la ejecute,
+la instrucción va a ser ejecutada de manera interrumpida, generando el efecto de "atomici_
+dad".
+
+-- d -- ¿Qué pasa con la implementación con incl al tener más de un procesador?
+
+La implementación deja de funcionar, ya que al tener más procesadores, la instrucción
+incl puede ser interrumpida en cualquier momento por otro procesador, perdiendo la exclu_
+sión mutua de los threads.
+
+-- -- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- -- --
