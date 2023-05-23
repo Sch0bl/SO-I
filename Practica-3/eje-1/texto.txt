@@ -1,0 +1,3 @@
+Es correcto.
+Un problema podria darse en el caso que no esten las lineas
+de mutex_lock. En este caso, A va a recibir la señal de despertarse, accederá a la región critica y podria encontrar a P = True y M = False.

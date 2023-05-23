@@ -1,0 +1,22 @@
+------------------------- EPOLL --------------------------------
+Epoll es una API (Aplication Programming Interface) que se uti-
+liza para el manejo de múlitples archivos de entrada y salida.
+
+Estos multiples file desciptors son manejados a travez de una est
+ructura de datos creada en el kernel que se basa su control de fd  
+con un arbol de tipo red-black lo cual escala mucho mejor en 
+comparación con select() y poll() que utilizan estructuras de 
+control lineales .
+
+Otra de las ventajas que tiene epoll es que además de indicar la
+cantidad de fd listos, tambien permite identificar estos mismos.
+
+Hay que aclarar que si bien epoll tiene una mejor performance que
+select y poll a gran esacal, estos úlitimos pueden ser mejores en
+casos que la cantidad de conecciones sea reducida. 
+
+Fuente = https://www.sobyte.net/post/2022-04/epoll-efficiently/
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+
+
+

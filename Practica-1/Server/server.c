@@ -125,18 +125,19 @@ void handle_conn(int csock)
 
 		if (rc == 0) {
 			/* linea vacia, se cerró la conexión */
-			write_data(FILE_DATA, &request_n);
+			/* write_data(FILE_DATA, &request_n); */
 			close(csock);
 			return;
 		}
 
 		if (!strcmp(buf, "NUEVO")) {
 			char reply[20];
+			request_n = read_data(FILE_DATA);
 			sprintf(reply, "%d\n", request_n);
 			request_n++;
 			write(csock, reply, strlen(reply));
-		} else if (!strcmp(buf, "CHAU")) {
 			write_data(FILE_DATA, &request_n);
+		} else if (!strcmp(buf, "CHAU")) {
 			close(csock);
 			return;
 		}
@@ -157,6 +158,7 @@ void wait_for_clients(int lsock)
 	    handle_conn(csock);
       exit(EXIT_SUCCESS);
   }
+	close(csock);
 	wait_for_clients(lsock);
 }
 

@@ -23,8 +23,7 @@ int cmd_exec(struct Cmd cmd){
 		dup2(cmd.output_fd, STDOUT_FILENO);
 		close(cmd.output_fd);
 	}
-	execvp(cmd.cmd[0], cmd.cmd);
-	return 1;
+	return execvp(cmd.cmd[0], cmd.cmd);
 }
 
 

@@ -1,58 +1,72 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
-#include <math.h>
+#include <unistd.h>
 
-#define N 10
-#define VPM 100
+#define N_MOLINETES 10
+#define N_VISITANTES 1000000
 
 int visitantes = 0;
 
-int flag[N];
-int choose[N]; // choose[i] == 1 si i esta eligiendo maximo
+int flag[N_MOLINETES]; //ya están inicializado en 0 :)
 
-int max(int* v) {
-  int result = v[0];
-	for (int i = 1; i < N; i++)
-		if (v[i] > result)
-			result = v[i];
-	return result;
+
+int turno[N_MOLINETES]; //0: turno thread 0 y 1: turno thread 1
+
+//lock -> permite generar cositas
+
+int max(int* turnos_pointer){return 0;}
+
+void lamport_lock(int persona) {
+	/* Calcula el npumero de turno */
+	flag[persona] = 1;
+	turno[persona] = 1 + max(turno);
+	flag[persona] = 0;
+
+	for(int j = 0; j < N_MOLINETES; j++){
+		/* Si el hilo j está calculando su número, espera a que termine */
+		while(flag[j]){/*bussy waiting*/}
+		
+		/* Si el hilo j tiene más prioridad, espera q que ponga su número a cero */
+		/* j tiene más prioridad si su número de turno es más bajo que el de i */
+		/* o bien si es el mismo número y además j es menor que i */
+
+		while((turno[j] != 0) &&
+				  ((turno[j] < turno[persona])) ||
+					((turno[j] == turno[persona] &&
+					(j < persona))))
+	}	
 }
 
-void* panaderia(void* arg){
-	int id = *(int*) arg;
-  printf("id: %d\n", id);
-	// Calcular numero de turno
-	for (int n = 0; n < VPM; n++) {
-	  choose[id] = 1;
-    flag[id] = 1 + max(flag);
-	  choose[id] = 0;
-
-	  for (int j = 0; j < N; j++) {
-	  	while (choose[j]);
-	  	while (flag[j] != 0 && flag[j] < flag[id]);
-  	}
-  	visitantes = visitantes + 1;	
-  	flag[id] = 0;
+void* molinete(void* arg){
+	for(int i = 0; i < N_VISITANTES; ++i){
+		flag[1] = 1;
+		turno = 0;
+		asm("mfence"); // Sincronización de Procesadores
+		while(flag[0] == 1 && turno == 0){
+		//	sleep(1);
+		}
+		//Reclamo la región crítica
+		visitantes++;
+		//libero :: región
+		//unlock(){
+		flag[1] = 0;
+		//}
 	}
 	return NULL;
 }
 
-
 int main(){
-  pthread_t t[N];
-	int id[N];
-	for (int i = 0; i < N; i++) {
-    choose[i] = 0;
-		id[i] = i;
-		flag[i] = 0;
-	}
+	pthread_t m0, m1;
 
-  for (int i = 0; i < N; i++)
-		pthread_create(t + i, NULL, panaderia, (void*) (id + i));
-	for (int i = 0; i < N; i++)
-		pthread_join(t[i], NULL);
+	pthread_create(&m0, NULL, molinete, NULL);
+	pthread_create(&m1, NULL, molinete, NULL);
+	
+	// hacer join
+	pthread_join(m0,NULL);
+	pthread_join(m1,NULL);
 
-  printf("Visitantes: %d\n", visitantes);
-
+	printf("El numero de visitantes es : %d\n", visitantes);
+	
 	return 0;
 }

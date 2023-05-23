@@ -15,6 +15,7 @@ void token_errors(char** unxp_token, const char* token, int* status){
 	*unxp_token = NULL;
 }
 
+
 int parsing_input(char** imput_cmd, struct Cmd** cmds){
 	char* token = strtok(*imput_cmd, DELIM);
 	if (token == NULL)
@@ -35,7 +36,6 @@ int parsing_input(char** imput_cmd, struct Cmd** cmds){
 		if (strcmp(token, REDIRECT) == 0){ //token ~ ">"
 			token = strtok(NULL, DELIM);
 			if ((token == NULL) || !(strcmp(token, PIPE) && strcmp(token, REDIRECT))){
-				printf("Hola\n");
 				token_errors(&token, REDIRECT, &status);
 			} else {
 				if (redirect_fd > NO_FD)
@@ -63,15 +63,13 @@ int parsing_input(char** imput_cmd, struct Cmd** cmds){
 		}
 	}
 	if (status){
-		list_destroy(&list);
 		cmds_destroy(new_cmds, counter);
 		free(new_cmds);
-	}
-	else{
+	}	else {
 		tokens = list_to_cmd(list);
 		new_cmds[counter++] = cmd_make(&tokens, redirect_fd);
-		list_destroy(&list);
 		*cmds = new_cmds;
 	}
+	list_destroy(&list);
 	return status ? -1 : counter;
 }
