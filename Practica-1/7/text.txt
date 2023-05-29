@@ -1,0 +1,1 @@
+En mi arquitectura cuando divide por cero no manda ninguna señal
