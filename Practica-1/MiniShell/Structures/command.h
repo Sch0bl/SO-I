@@ -15,5 +15,5 @@ void cmds_destroy(struct Cmd* cmd, int len);
 
 void cmd_destroy(struct Cmd cmd);
 
-void cmd_pipe_exec(struct Cmd* cmds, int **fd, int cmd_len);
+void cmd_pipe_exec(struct Cmd* cmds, int cmd_len);
 #endif

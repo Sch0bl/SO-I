@@ -6,6 +6,9 @@
 #include <assert.h>
 #include <sys/wait.h>
 
+#define INPUT 0
+#define OUTPUT 1 
+
 struct Cmd cmd_make(char*** cmd, int fd){
 	struct Cmd new_cmd;
 	new_cmd.cmd = *cmd;
@@ -38,35 +41,37 @@ void cmd_destroy(struct Cmd cmd){
 		close(cmd.output_fd);
 }
 
- void cmd_pipe_exec(struct Cmd* cmds, int **fd, int cmd_len){
+ void cmd_pipe_exec(struct Cmd* cmds, int cmd_len){
 	pid_t last_pid;
-	fd = malloc(sizeof(int*) * (cmd_len));
+	int **fd = malloc(sizeof(int*) * (cmd_len));
 	for (int i = 0; i < cmd_len ; i++) 
 		fd[i] = malloc(sizeof(int) * 2);	
 
-	for(int i = 0; i < cmd_len; i++){
+	for(int i = 0; i < cmd_len; i++){ 
 		pipe(fd[i]);
 		pid_t pid = fork();
 		if ( i == cmd_len - 1)
 			last_pid = pid;
 
-		if ( pid == 0 ){
-			if ( i != cmd_len - 1 ){
-				dup2(fd[i][1], STDOUT_FILENO);
-				close(fd[i][0]);
-				close(fd[i][1]);
-			} 
-			if ( i != 0 ){
-				dup2(fd[i - 1][0],STDIN_FILENO);
-				close(fd[i - 1][0]);
+		if ( pid == 0 ){ // Estoy en el hijo
+                     
+			if ( i != 0 ){ // Si no soy el primero
+				dup2(fd[i - 1][INPUT],STDIN_FILENO);
+				close(fd[i - 1][INPUT]);
 			}
+
+			if ( i != cmd_len - 1 ){ // Si no soy el último
+				dup2(fd[i][OUTPUT], STDOUT_FILENO);
+				close(fd[i][INPUT]);
+				close(fd[i][OUTPUT]);
+			} 
+      
 			cmd_exec(cmds[i]);
 		} else {
-			if ( i != 0)
-				close(fd[i - 1][0]);
-			if ( i == cmd_len )
-				close(fd[i][0]);
-			close(fd[i][1]);
+			if (i != 0)
+				close(fd[i - 1][INPUT]);
+      if (i != cmd_len - 1)
+			  close(fd[i][OUTPUT]);
 		}
 	}
 	waitpid(last_pid, NULL,0);
