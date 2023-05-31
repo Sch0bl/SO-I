@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 int main(){
-  printf("Soy el padre con el id: %d",getpid());
+  printf("Soy el padre con el id: %d\n",getpid());
   pid_t child1_pid = fork();
 
   if (!child1_pid) {

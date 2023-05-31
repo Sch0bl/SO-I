@@ -41,7 +41,7 @@ void cmd_destroy(struct Cmd cmd){
 		close(cmd.output_fd);
 }
 
- void cmd_pipe_exec(struct Cmd* cmds, int cmd_len){
+void cmd_pipe_exec(struct Cmd* cmds, int cmd_len){
 	pid_t last_pid;
 	int **fd = malloc(sizeof(int*) * (cmd_len));
 	for (int i = 0; i < cmd_len ; i++) 
