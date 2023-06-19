@@ -8,7 +8,7 @@ int a[N];
 
 int main(){
     srand(time(NULL)); 
-    for(int i = 0; si < N; i++)
+    for(int i = 0; i < N; i++)
         a[i] = rand() % N;
     int min = a[0];
     
