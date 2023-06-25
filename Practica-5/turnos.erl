@@ -75,6 +75,7 @@ get_request(Socket, N, Counter, Server) ->
       io:fwrite("Adios !!!~n"),
       gen_tcp:close(Socket),
       Server ! {self(), {del, N}};
+    {tcp,}
     {tcp_closed, Socket} -> 
       io:fwrite("Conexion con cliente: ~p terminada~n", [Socket]),
       gen_tcp:close(Socket);
